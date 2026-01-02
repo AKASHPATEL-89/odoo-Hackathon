@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HR Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="dashboard.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-2 sidebar p-3 text-white">
+      <h5 class="text-center mb-4"><i class="bi bi-people-fill"></i> HR Panel</h5>
+      <a href="dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      <a href="attendance.html" class="nav-link"><i class="bi bi-calendar-check"></i> Attendance</a>
+      <a href="leaves.html" class="nav-link"><i class="bi bi-calendar-x"></i> Leaves</a>
+      <a href="employees.html" class="nav-link"><i class="bi bi-people"></i> Employees</a>
+      <a href="reports.html" class="nav-link"><i class="bi bi-graph-up"></i> Reports</a>
+      <a href="#" class="mt-3 text-danger" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-10 main-content">
+      <!-- Top Bar -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+          <h4><i class="bi bi-calendar-date"></i> Employee Attendance & Leave Dashboard</h4>
+          <small class="text-muted">Today: <span id="currentDate"></span></small>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary btn-sm filter-btn active" data-filter="today">Today</button>
+          <button class="btn btn-outline-primary btn-sm filter-btn" data-filter="week">Week</button>
+          <button class="btn btn-outline-primary btn-sm filter-btn" data-filter="month">Month</button>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="row mb-4">
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-people fs-3 text-primary"></i>
+              <h6 class="mt-2">Total Employees</h6>
+              <h3 id="totalEmployees">50</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-check-circle fs-3 text-success"></i>
+              <h6 class="mt-2">Present Today</h6>
+              <h3 id="presentToday" class="text-success">42</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-x-circle fs-3 text-danger"></i>
+              <h6 class="mt-2">Absent</h6>
+              <h3 id="absentToday" class="text-danger">3</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-calendar-x fs-3 text-warning"></i>
+              <h6 class="mt-2">On Leave</h6>
+              <h3 id="onLeave" class="text-warning">5</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-clock fs-3 text-info"></i>
+              <h6 class="mt-2">Late Check-ins</h6>
+              <h3 id="lateCheckins" class="text-info">7</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-house fs-3 text-primary"></i>
+              <h6 class="mt-2">Work From Home</h6>
+              <h3 id="wfhToday" class="text-primary">8</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card alert-panel">
+            <div class="card-body">
+              <h6><i class="bi bi-exclamation-triangle"></i> Alerts & Notifications</h6>
+              <div>
+                <small><i class="bi bi-person-x"></i> 2 employees absent for 2+ days</small><br>
+                <small><i class="bi bi-clock-history"></i> 3 employees late more than 3 times this week</small><br>
+                <small><i class="bi bi-envelope"></i> 4 leave approvals pending</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HR Controls -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <h6><i class="bi bi-gear"></i> HR / Admin Controls</h6>
+              <div class="d-flex flex-wrap gap-2 mt-3">
+                <button class="btn btn-success" onclick="openApprovalModal()">
+                  <i class="bi bi-check-circle"></i> Approve Leave
+                </button>
+                <button class="btn btn-danger" onclick="openRejectionModal()">
+                  <i class="bi bi-x-circle"></i> Reject Leave
+                </button>
+                <button class="btn btn-primary" onclick="openEditModal()">
+                  <i class="bi bi-pencil-square"></i> Edit Attendance
+                </button>
+                <button class="btn btn-info" onclick="exportReport()">
+                  <i class="bi bi-download"></i> Export Report
+                </button>
+                <button class="btn btn-warning" onclick="markAttendance()">
+                  <i class="bi bi-clock"></i> Mark Attendance
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal fade" id="approvalModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Approve Leave Request</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Select leave request to approve:</p>
+        <select class="form-select" id="leaveSelect">
+          <option>Ravi Mehta - Casual Leave (1 day)</option>
+          <option>Kiran Joshi - Casual Leave (1 day)</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" onclick="approveLeave()">Approve</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="rejectionModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reject Leave Request</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Select leave request to reject:</p>
+        <select class="form-select" id="rejectSelect" class="mb-3">
+          <option>Ravi Mehta - Casual Leave (1 day)</option>
+          <option>Kiran Joshi - Casual Leave (1 day)</option>
+        </select>
+        <textarea class="form-control" placeholder="Reason for rejection" rows="3"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="rejectLeave()">Reject</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Attendance</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Employee</label>
+          <select class="form-select">
+            <option>Rahul Sharma</option>
+            <option>Priya Singh</option>
+            <option>Amit Kumar</option>
+          </select>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <label class="form-label">Check-in Time</label>
+            <input type="time" class="form-control" value="09:00">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Check-out Time</label>
+            <input type="time" class="form-control" value="18:00">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveAttendance()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Check login status
+if (!localStorage.getItem('userLoggedIn')) {
+  window.location.href = 'login.html';
+}
+
+// Set current date
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN');
+
+// Logout functionality
+document.getElementById('logoutBtn').addEventListener('click', function() {
+  localStorage.removeItem('userLoggedIn');
+  window.location.href = 'login.html';
+});
+
+// HR Control Functions
+function openApprovalModal() {
+  new bootstrap.Modal(document.getElementById('approvalModal')).show();
+}
+
+function openRejectionModal() {
+  new bootstrap.Modal(document.getElementById('rejectionModal')).show();
+}
+
+function openEditModal() {
+  new bootstrap.Modal(document.getElementById('editModal')).show();
+}
+
+function approveLeave() {
+  alert('Leave request approved successfully!');
+  bootstrap.Modal.getInstance(document.getElementById('approvalModal')).hide();
+}
+
+function rejectLeave() {
+  alert('Leave request rejected!');
+  bootstrap.Modal.getInstance(document.getElementById('rejectionModal')).hide();
+}
+
+function saveAttendance() {
+  alert('Attendance updated successfully!');
+  bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+}
+
+function exportReport() {
+  const csvContent = "data:text/csv;charset=utf-8,Name,Status,Check-in,Check-out\nRahul Sharma,Present,09:15,18:30\nPriya Singh,Present,09:00,18:00";
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "attendance_report.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  alert('Report exported successfully!');
+}
+
+function markAttendance() {
+  const time = new Date().toLocaleTimeString();
+  alert(`Attendance marked at ${time}`);
+}
+</script>
+
+</body>
+</html>

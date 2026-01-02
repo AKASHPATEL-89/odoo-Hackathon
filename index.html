@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Attendance & Leave Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f4f6f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .sidebar {
+      height: 100vh;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      position: fixed;
+      overflow-y: auto;
+    }
+    .sidebar a {
+      color: #ffffff;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin: 5px 0;
+      transition: all 0.3s ease;
+    }
+    .sidebar a:hover {
+      background-color: rgba(255,255,255,0.1);
+      transform: translateX(5px);
+    }
+    .main-content {
+      margin-left: 16.66667%;
+      padding: 20px;
+    }
+    .card {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: none;
+      border-radius: 12px;
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+    }
+    .summary-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .summary-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .alert-panel {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      border-radius: 12px;
+    }
+    .table-responsive {
+      max-height: 400px;
+      overflow-y: auto;
+      border-radius: 8px;
+    }
+    .btn-group .btn {
+      margin: 0 5px;
+      border-radius: 8px !important;
+    }
+    .progress {
+      height: 8px;
+      border-radius: 10px;
+    }
+    .filter-btn.active {
+      background-color: #007bff !important;
+      color: white !important;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        position: relative;
+        height: auto;
+      }
+      .main-content {
+        margin-left: 0;
+      }
+      .summary-card {
+        margin-bottom: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Sidebar -->
+    <div class="col-md-2 sidebar p-3 text-white">
+      <h5 class="text-center mb-4"><i class="bi bi-people-fill"></i> HR Panel</h5>
+      <a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      <a href="attendance.html"><i class="bi bi-calendar-check"></i> Attendance</a>
+      <a href="leaves.html"><i class="bi bi-calendar-x"></i> Leaves</a>
+      <a href="employees.html"><i class="bi bi-people"></i> Employees</a>
+      <a href="reports.html"><i class="bi bi-graph-up"></i> Reports</a>
+      <a href="#" class="mt-3 text-danger" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-10 main-content">
+
+      <!-- Top Bar -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+          <h4><i class="bi bi-calendar-date"></i> Employee Attendance & Leave Dashboard</h4>
+          <small class="text-muted">Today: <span id="currentDate"></span></small>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary btn-sm filter-btn active" data-filter="today">Today</button>
+          <button class="btn btn-outline-primary btn-sm filter-btn" data-filter="week">Week</button>
+          <button class="btn btn-outline-primary btn-sm filter-btn" data-filter="month">Month</button>
+        </div>
+      </div>
+
+      <!-- 1️⃣ Top Summary Cards -->
+      <div class="row mb-4">
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-people fs-3 text-primary"></i>
+              <h6 class="mt-2">Total Employees</h6>
+              <h3 id="totalEmployees">50</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-check-circle fs-3 text-success"></i>
+              <h6 class="mt-2">Present Today</h6>
+              <h3 id="presentToday" class="text-success">42</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-x-circle fs-3 text-danger"></i>
+              <h6 class="mt-2">Absent</h6>
+              <h3 id="absentToday" class="text-danger">3</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-calendar-x fs-3 text-warning"></i>
+              <h6 class="mt-2">On Leave</h6>
+              <h3 id="onLeave" class="text-warning">5</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-clock fs-3 text-info"></i>
+              <h6 class="mt-2">Late Check-ins</h6>
+              <h3 id="lateCheckins" class="text-info">7</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="card summary-card text-center">
+            <div class="card-body">
+              <i class="bi bi-house fs-3 text-primary"></i>
+              <h6 class="mt-2">Work From Home</h6>
+              <h3 id="wfhToday" class="text-primary">8</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🚨 Alerts & Notifications -->
+      <div class="row mb-4" id="alertsSection">
+        <div class="col-12">
+          <div class="card alert-panel">
+            <div class="card-body">
+              <h6><i class="bi bi-exclamation-triangle"></i> Alerts & Notifications</h6>
+              <div id="alertsList">
+                <small><i class="bi bi-person-x"></i> 2 employees absent for 2+ days</small><br>
+                <small><i class="bi bi-clock-history"></i> 3 employees late more than 3 times this week</small><br>
+                <small><i class="bi bi-envelope"></i> 4 leave approvals pending</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- 2️⃣ Today's Attendance List -->
+        <div class="col-md-8">
+          <div class="card mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5><i class="bi bi-list-check"></i> Today's Attendance</h5>
+                <input type="text" class="form-control w-25" placeholder="Search employee..." id="searchEmployee">
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Employee</th>
+                      <th>ID</th>
+                      <th>Department</th>
+                      <th>Status</th>
+                      <th>Check-in</th>
+                      <th>Check-out</th>
+                      <th>Hours</th>
+                    </tr>
+                  </thead>
+                  <tbody id="attendanceTable">
+                    <!-- JS will populate -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6️⃣ Department-Wise Attendance -->
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h6><i class="bi bi-building"></i> Department Attendance</h6>
+              <div id="departmentStats">
+                <!-- JS will populate -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- 3️⃣ Leave Management -->
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h6><i class="bi bi-calendar-event"></i> Leave Management</h6>
+              <div class="row mb-3">
+                <div class="col-4 text-center">
+                  <small>Total Requests</small>
+                  <h5 class="text-primary">12</h5>
+                </div>
+                <div class="col-4 text-center">
+                  <small>Approved</small>
+                  <h5 class="text-success">8</h5>
+                </div>
+                <div class="col-4 text-center">
+                  <small>Pending</small>
+                  <h5 class="text-warning">4</h5>
+                </div>
+              </div>
+              <div class="table-responsive" style="max-height: 300px;">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Employee</th>
+                      <th>Type</th>
+                      <th>Duration</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="leaveTable">
+                    <!-- JS will populate -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4️⃣ Absent Employees -->
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h6><i class="bi bi-person-x"></i> Absent Employees</h6>
+              <div class="table-responsive" style="max-height: 300px;">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Employee</th>
+                      <th>Department</th>
+                      <th>Last Working</th>
+                      <th>Contact</th>
+                    </tr>
+                  </thead>
+                  <tbody id="absentTable">
+                    <!-- JS will populate -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- 5️⃣ Late Coming & Early Leaving -->
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h6><i class="bi bi-clock-history"></i> Late Coming & Early Leaving</h6>
+              <div class="row">
+                <div class="col-6">
+                  <h6 class="text-danger">Late Arrivals</h6>
+                  <ul id="lateArrivalsList" class="list-unstyled">
+                    <!-- JS will populate -->
+                  </ul>
+                </div>
+                <div class="col-6">
+                  <h6 class="text-warning">Early Checkout</h6>
+                  <ul id="earlyCheckoutList" class="list-unstyled">
+                    <!-- JS will populate -->
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7️⃣ Monthly Summary -->
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h6><i class="bi bi-calendar-month"></i> Monthly Attendance Summary</h6>
+              <div class="row text-center">
+                <div class="col-6">
+                  <small>Working Days</small>
+                  <h5>22</h5>
+                </div>
+                <div class="col-6">
+                  <small>Avg Attendance</small>
+                  <h5 class="text-success">94%</h5>
+                </div>
+              </div>
+              <div class="progress mt-3">
+                <div class="progress-bar bg-success" style="width: 94%">94%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🔟 HR Controls -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <h6><i class="bi bi-gear"></i> HR / Admin Controls</h6>
+              <div class="d-flex flex-wrap gap-2 mt-3">
+                <button class="btn btn-success" id="approveBtn">
+                  <i class="bi bi-check-circle"></i> Approve Leave
+                </button>
+                <button class="btn btn-danger" id="rejectBtn">
+                  <i class="bi bi-x-circle"></i> Reject Leave
+                </button>
+                <button class="btn btn-primary" id="editBtn">
+                  <i class="bi bi-pencil-square"></i> Edit Attendance
+                </button>
+                <button class="btn btn-info" id="exportBtn">
+                  <i class="bi bi-download"></i> Export Report
+                </button>
+                <button class="btn btn-warning" id="markAttendanceBtn">
+                  <i class="bi bi-clock"></i> Mark Attendance
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Dashboard JS -->
+<script>
+  // Set current date
+  document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN');
+
+  // Sample Data
+  let attendanceData = [
+    { name: "Rahul Sharma", id: "EMP001", dept: "IT", status: "Present", checkin: "09:15", checkout: "18:30", hours: "9h 15m" },
+    { name: "Priya Singh", id: "EMP002", dept: "HR", status: "Present", checkin: "09:00", checkout: "18:00", hours: "9h 00m" },
+    { name: "Amit Kumar", id: "EMP003", dept: "Finance", status: "Late", checkin: "10:30", checkout: "-", hours: "-" },
+    { name: "Sneha Patel", id: "EMP004", dept: "Marketing", status: "WFH", checkin: "09:00", checkout: "17:30", hours: "8h 30m" },
+    { name: "Vikash Gupta", id: "EMP005", dept: "IT", status: "Absent", checkin: "-", checkout: "-", hours: "-" },
+    { name: "Anita Rao", id: "EMP006", dept: "HR", status: "Leave", checkin: "-", checkout: "-", hours: "-" }
+  ];
+
+  let leaveData = [
+    { name: "Anita Rao", type: "Sick", duration: "2 days", status: "Approved", id: 1 },
+    { name: "Ravi Mehta", type: "Casual", duration: "1 day", status: "Pending", id: 2 },
+    { name: "Sunita Das", type: "Paid", duration: "5 days", status: "Approved", id: 3 },
+    { name: "Kiran Joshi", type: "Casual", duration: "1 day", status: "Pending", id: 4 }
+  ];
+
+  const absentData = [
+    { name: "Vikash Gupta", dept: "IT", lastWorking: "Yesterday", contact: "Not Informed" },
+    { name: "Mohan Lal", dept: "Finance", lastWorking: "2 days ago", contact: "Informed" },
+    { name: "Rita Sharma", dept: "Marketing", lastWorking: "Today", contact: "Informed" }
+  ];
+
+  const departmentData = [
+    { name: "IT", total: 15, present: 12, percentage: 80 },
+    { name: "HR", total: 8, present: 7, percentage: 87.5 },
+    { name: "Finance", total: 10, present: 8, percentage: 80 },
+    { name: "Marketing", total: 12, present: 10, percentage: 83.3 }
+  ];
+
+  // Populate Attendance Table
+  function populateAttendanceTable() {
+    const tbody = document.getElementById('attendanceTable');
+    tbody.innerHTML = '';
+    
+    attendanceData.forEach(emp => {
+      const statusIcon = {
+        'Present': '🟢',
+        'Absent': '🔴',
+        'Leave': '🟡',
+        'WFH': '🔵',
+        'Late': '🟠'
+      };
+      
+      const row = `
+        <tr>
+          <td>${emp.name}</td>
+          <td>${emp.id}</td>
+          <td>${emp.dept}</td>
+          <td>${statusIcon[emp.status]} ${emp.status}</td>
+          <td>${emp.checkin}</td>
+          <td>${emp.checkout}</td>
+          <td>${emp.hours}</td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+  }
+
+  // Populate Leave Table
+  function populateLeaveTable() {
+    const tbody = document.getElementById('leaveTable');
+    tbody.innerHTML = '';
+    
+    leaveData.forEach(leave => {
+      const statusBadge = leave.status === 'Approved' ? 
+        '<span class="badge bg-success">Approved</span>' : 
+        '<span class="badge bg-warning text-dark">Pending</span>';
+      
+      const row = `
+        <tr data-leave-id="${leave.id}">
+          <td>${leave.name}</td>
+          <td>${leave.type}</td>
+          <td>${leave.duration}</td>
+          <td>${statusBadge}</td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+  }
+
+  // Populate Absent Table
+  function populateAbsentTable() {
+    const tbody = document.getElementById('absentTable');
+    tbody.innerHTML = '';
+    
+    absentData.forEach(absent => {
+      const contactBadge = absent.contact === 'Informed' ? 
+        '<span class="badge bg-success">Informed</span>' : 
+        '<span class="badge bg-danger">Not Informed</span>';
+      
+      const row = `
+        <tr>
+          <td>${absent.name}</td>
+          <td>${absent.dept}</td>
+          <td>${absent.lastWorking}</td>
+          <td>${contactBadge}</td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+  }
+
+  // Populate Department Stats
+  function populateDepartmentStats() {
+    const container = document.getElementById('departmentStats');
+    container.innerHTML = '';
+    
+    departmentData.forEach(dept => {
+      const item = `
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <small class="fw-bold">${dept.name}</small>
+            <small class="text-muted">${dept.present}/${dept.total} (${dept.percentage}%)</small>
+          </div>
+          <div class="progress">
+            <div class="progress-bar bg-success" style="width: ${dept.percentage}%"></div>
+          </div>
+        </div>
+      `;
+      container.innerHTML += item;
+    });
+  }
+
+  // Populate Late Arrivals and Early Checkout
+  function populateLateAndEarly() {
+    const lateList = document.getElementById('lateArrivalsList');
+    const earlyList = document.getElementById('earlyCheckoutList');
+    
+    lateList.innerHTML = `
+      <li class="mb-1"><small><i class="bi bi-person"></i> Amit Kumar - 10:30 AM</small></li>
+      <li class="mb-1"><small><i class="bi bi-person"></i> Ravi Mehta - 10:15 AM</small></li>
+      <li class="mb-1"><small><i class="bi bi-person"></i> Suresh Yadav - 09:45 AM</small></li>
+    `;
+    
+    earlyList.innerHTML = `
+      <li class="mb-1"><small><i class="bi bi-person"></i> Neha Gupta - 5:30 PM</small></li>
+      <li class="mb-1"><small><i class="bi bi-person"></i> Rajesh Kumar - 5:15 PM</small></li>
+    `;
+  }
+
+  // Search functionality
+  document.getElementById('searchEmployee').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#attendanceTable tr');
+    
+    rows.forEach(row => {
+      const name = row.cells[0].textContent.toLowerCase();
+      row.style.display = name.includes(searchTerm) ? '' : 'none';
+    });
+  });
+
+  // Filter functionality
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Remove active class from all buttons
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      // Add active class to clicked button
+      this.classList.add('active');
+      
+      const filter = this.dataset.filter;
+      showNotification(`Filtering data for: ${filter}`, 'info');
+      
+      // Here you can implement actual filtering logic
+      console.log(`Filtering data for: ${filter}`);
+    });
+  });
+
+  // Logout functionality
+  document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (confirm('Are you sure you want to logout?')) {
+      window.location.href = 'login.html';
+    }
+  });
+
+  // HR Control functions with proper event listeners
+  document.getElementById('approveBtn').addEventListener('click', function() {
+    const pendingLeaves = leaveData.filter(leave => leave.status === 'Pending');
+    if (pendingLeaves.length > 0) {
+      const leave = pendingLeaves[0];
+      leave.status = 'Approved';
+      populateLeaveTable();
+      showNotification(`Leave approved for ${leave.name}`, 'success');
+    } else {
+      showNotification('No pending leaves to approve', 'warning');
+    }
+  });
+
+  document.getElementById('rejectBtn').addEventListener('click', function() {
+    const pendingLeaves = leaveData.filter(leave => leave.status === 'Pending');
+    if (pendingLeaves.length > 0) {
+      const leave = pendingLeaves[0];
+      leave.status = 'Rejected';
+      populateLeaveTable();
+      showNotification(`Leave rejected for ${leave.name}`, 'danger');
+    } else {
+      showNotification('No pending leaves to reject', 'warning');
+    }
+  });
+
+  document.getElementById('editBtn').addEventListener('click', function() {
+    showNotification('Edit attendance functionality - Opening modal...', 'info');
+    // Here you can open a modal for editing attendance
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', function() {
+    exportToCSV();
+    showNotification('Report exported successfully!', 'success');
+  });
+
+  document.getElementById('markAttendanceBtn').addEventListener('click', function() {
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-IN', { hour12: false, hour: '2-digit', minute: '2-digit' });
+    showNotification(`Attendance marked at ${time}`, 'success');
+  });
+
+  // Notification system
+  function showNotification(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+      if (alertDiv.parentNode) {
+        alertDiv.remove();
+      }
+    }, 3000);
+  }
+
+  // Export to CSV function
+  function exportToCSV() {
+    const csvContent = "data:text/csv;charset=utf-8," + 
+      "Name,ID,Department,Status,Check-in,Check-out,Hours\n" +
+      attendanceData.map(emp => 
+        `${emp.name},${emp.id},${emp.dept},${emp.status},${emp.checkin},${emp.checkout},${emp.hours}`
+      ).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `attendance_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Update summary cards dynamically
+  function updateSummaryCards() {
+    const present = attendanceData.filter(emp => emp.status === 'Present').length;
+    const absent = attendanceData.filter(emp => emp.status === 'Absent').length;
+    const onLeave = attendanceData.filter(emp => emp.status === 'Leave').length;
+    const wfh = attendanceData.filter(emp => emp.status === 'WFH').length;
+    const late = attendanceData.filter(emp => emp.status === 'Late').length;
+    
+    document.getElementById('presentToday').textContent = present;
+    document.getElementById('absentToday').textContent = absent;
+    document.getElementById('onLeave').textContent = onLeave;
+    document.getElementById('wfhToday').textContent = wfh;
+    document.getElementById('lateCheckins').textContent = late;
+  }
+
+  // Initialize dashboard
+  document.addEventListener('DOMContentLoaded', function() {
+    populateAttendanceTable();
+    populateLeaveTable();
+    populateAbsentTable();
+    populateDepartmentStats();
+    populateLateAndEarly();
+    updateSummaryCards();
+    
+    // Show welcome notification
+    setTimeout(() => {
+      showNotification('Welcome to HR Dashboard! All systems are operational.', 'success');
+    }, 1000);
+  });
+</script>
+
+</body>
+</html>
+
